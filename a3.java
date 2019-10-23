@@ -120,11 +120,19 @@ public static void siftDown(int newNum) {
 
     }
     */
+    public static class Path {
+        int distance;
+        char[] path;
+        char[] parents;
+        int totalVertices;
+    }
     public static int[][] adjacencyList = new int[26][26];
     static int totalCount = 0;
     static String alphabet = new String("abcdefghijklmnopqrstuvwxyz");
     static  int vertices = 0;
     static int sides = 0;
+    static char targetPos;
+    static char startPos;
    
     public static void main(String[] args) {
        
@@ -145,21 +153,29 @@ public static void siftDown(int newNum) {
                     vertices = Integer.parseInt(parts[0]);
                     //System.out.println("vertices: " + vertices);
 
+                } else if(parts.length == 2 ) { // If at the last line where start and end positions are given....
+                
+                    startPos = parts[0].toCharArray()[0]; // Set start pos
+                    targetPos =  parts[1].toCharArray()[0]; //Set end pos
+                    System.out.println(startPos + " " + targetPos);
+
                 }
                
                 // Ignoring the part with co-ordinates, only looking at which nodes are connected....
-                if(!isNumeric(parts[1])) {
+                if(!isNumeric(parts[1]) && parts.length == 3) {
                     int position = 0;   
                     char first = '/';
                     char second = '/';
                     int weight = 0;
                     boolean hasEntry = false;
                    
+                   
                     // For every letter...
                     for(char letter = 'a'; letter <= 'z'; letter++) {
                         
                         //setting start position of edge to the first character read in....
                         first = parts[0].toCharArray()[0];
+                       
                         
                         //If the current letter matches the 'start position' 
                         if(letter == first) {
@@ -181,20 +197,82 @@ public static void siftDown(int newNum) {
                         }
                         
                     }  
-                }
+                } 
                 
              
             }
         } catch( Exception e) {
+            System.out.println(e.toString());
+        }
+        
+        Path path = Dj(-1, 2); // Finding the fastest path using Dijstra's
+
+            
+        System.out.println("-----Shortest path with Djisktra's:----------");
+        System.out.print("Path: ");
+
+        for(int x = 0; x < path.path.length; x++) {
+        if(x != path.path.length -1){
+            System.out.print(path.path[x] + ", "); // Print all nodes in the path... 
+        } else {
+            System.out.print(path.path[x]);
+            System.out.println();
 
         }
         
-        Dj();
+
+    }
+     
+        System.out.println("Path distance: " + path.distance);
+    
+        System.out.println("Number of vertices visited: " + path.totalVertices);
+        
+        System.out.println();
+        //Removing each edge for a  
+        Path fastestPath = null;
+        for(int x = 0; x < path.path.length -1; x++) {
+            
+            int previous = x +1;
+            int temp = adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])];
+            //System.out.println("Removing edge between: " + path.path[x] + " " + path.path[previous] + " " +  adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])]);
+            adjacencyList[alphabet.indexOf(path.path[x] )][alphabet.indexOf(path.path[previous])] = 0; 
+            Path p = Dj(alphabet.indexOf(path.path[x]), x);
+            adjacencyList[alphabet.indexOf(path.path[x] )][alphabet.indexOf(path.path[previous])] = temp;
+            if(fastestPath == null) {
+                fastestPath = p;
+            } else if(fastestPath.distance > p.distance) {
+                fastestPath = p;
+            }
+           
+        }
+
+            
+        System.out.println("---------Second Shortest path with Djisktra's-----------------");
+        System.out.print("Path: ");
+        for(int x = 0; x < fastestPath.path.length; x++) {
+        if(x != fastestPath.path.length -1){
+            System.out.print(fastestPath.path[x] + ", "); // Print all nodes in the path... 
+        } else {
+            System.out.print(fastestPath.path[x]);
+            System.out.println();
+
+        }
+        
+
+    }
+     
+        
+     
+        System.out.println("Path distance: " + fastestPath.distance);
+    
+        System.out.println("Number of vertices visited: " + fastestPath.totalVertices);
+      
+        
 }
 
 
 
-public static void Dj() { 
+public static Path Dj(int ignore, int position) { 
     int[] distance = new int[vertices]; // Holds the distances between a and each node that a can access...
     char[] candidates = new char[vertices]; // Holds the information about which nodes have not been selected...
     int candidateCount = vertices;
@@ -225,11 +303,13 @@ public static void Dj() {
 
     selectedCount++; //Assuming we have selected the entry node... 
     for(int x = 0; x < vertices -1; x++) {
-        
+        int closestIndex;
+        char closest;
         //Setting the index and letter to the node which is yet to be added and has least distance...
-        int closestIndex = findSmallestDistance(distance); 
-        char closest = alphabet.charAt(findSmallestDistance(distance));
-        
+        closestIndex = findSmallestDistance(distance, ignore, position); 
+        closest = alphabet.charAt(findSmallestDistance(distance, ignore, position));
+         
+            
         //Tracking order and count of nodes that have been visited (moved to selected from candidate set)
         selected[selectedCount] = closest;
         selectedCount++;
@@ -239,15 +319,12 @@ public static void Dj() {
         
         //Setting the finalDistance of the selected node as it has been 'visited' and therefore it's distance is set...
         finalDistance[closestIndex] = distance[closestIndex];
-        //parents[closestIndex] = x; 
-        
-        
-        //int closestIndex = findSmallestDistance(distance);
+       
         
         //If the closest node is the target node, break loop
         if(closest == 't') break;
         candidateCount--;
-        
+
         // For all vertices...
         for(int z = 0; z < vertices; z++) {
 
@@ -281,16 +358,23 @@ public static void Dj() {
         
     }
     */
-    System.out.println("Shortest path with Djisktra's:");
-    showParents(0, alphabet.indexOf('t'), parents);
-    System.out.println("Path distance: " + finalDistance[alphabet.indexOf("t")]);
+
     
-    System.out.println("Number of vertices visited: " + selectedCount);
+    //System.out.println("Shortest path with Djisktra's:");
+    char[] path = showParents(0, alphabet.indexOf('t'), parents);
+    //System.out.println("Path distance: " + finalDistance[alphabet.indexOf("t")]);
+    //System.out.println("Number of vertices visited: " + selectedCount);
+    Path finalPath = new Path();
+    finalPath.distance =  finalDistance[alphabet.indexOf(targetPos)];
+    finalPath.parents = parents;
+    finalPath.path = path;
+    finalPath.totalVertices = selectedCount;
+    return finalPath;
    
 
 }
         
-public static void showParents(int start, int end, char[] parents) {
+public static char[] showParents(int start, int end, char[] parents) {
     char parent = parents[end]; //Setting the first parent, i.e. the parent of the target node...
     char[] path = new char[vertices]; //Array to hold the path that is taken to reach target node from start node...
     int pathCount = 0; //Counter to count the number of vertices in the path
@@ -307,14 +391,28 @@ public static void showParents(int start, int end, char[] parents) {
     } 
 
     path[pathCount] = alphabet.charAt(end); // Add the target node to the end of the path... 
-    //System.out.println(parent);
+    pathCount++;
     
-    System.out.print("Path: " + path[0] + ", ");
+    
+    //System.out.print("Path: " + path[0] + ", ");
     for(int x = 1; x <= pathCount; x++) {
-        System.out.print(path[x] + ", "); // Print all nodes in the path... 
+        if(x != pathCount){
+            //System.out.print(path[x] + ", "); // Print all nodes in the path... 
+        } else {
+           //  System.out.print(path[x]);
+           //  System.out.println();
+
+        }
+        
 
     }
-    System.out.println();
+    char[] finalPath = new char[pathCount]; 
+    for(int x = 0; x < pathCount; x++) {
+        finalPath[x] = path[x];
+    }
+
+
+    return finalPath;
 }
     
    
@@ -322,18 +420,24 @@ public static void showParents(int start, int end, char[] parents) {
 
     
     
-    public static int findSmallestDistance(int[] distance) {
+    public static int findSmallestDistance(int[] distance, int ignore, int ignorePosition) {
         int smallest = -1;
+        int second = -1;
         for(int x = 0; x < distance.length ; x++) {
+         
             if(smallest == -1 ){
                 if(distance[x] > 0) {
                     smallest = x;
                 } 
             } else {
                 if(distance[x] > 0 && distance[x] < distance[smallest]) {
+                    second = smallest;
                     smallest = x;
                 }
             }
+            
+
+
         }
 
         return smallest;
