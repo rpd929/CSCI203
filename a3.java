@@ -4,6 +4,7 @@
     */
 import java.io.*;
 import java.lang.Object;
+import java.math.*;
 
 public class a3 {
     /*
@@ -133,6 +134,10 @@ public static void siftDown(int newNum) {
     static int sides = 0;
     static char targetPos;
     static char startPos;
+    static double[] distanceToGoal = new double[26];
+    static int[][] positionInGraph = new int[26][2];
+    static int targetXpos;
+    static int targetYpos;
    
     public static void main(String[] args) {
        
@@ -193,16 +198,41 @@ public static void siftDown(int newNum) {
                         } else {
                             hasEntry = false;
                             position++;
-                           
+                            
                         }
                         
                     }  
-                } 
+                } else if(parts.length == 3) {
+                    
+                    int xPosition = Integer.parseInt(parts[1]);
+                    int yPosition = Integer.parseInt(parts[2]);
+                    int pos = alphabet.indexOf(parts[0]);
+                    positionInGraph[pos][0] = xPosition;
+                    positionInGraph[pos][1] = yPosition;
+                    //System.out.println(pos + ": " + xPosition + " " + yPosition + " " + alphabet.indexOf(targetPos));
+                    
+                    
+                }
                 
              
             }
+
+            
+            targetXpos = positionInGraph[alphabet.indexOf(targetPos)][0];
+            targetYpos =  positionInGraph[alphabet.indexOf(targetPos)][1];
+           
+            for(int x = 0; x < vertices; x++) {
+                int distanceToXPos = Math.abs(targetXpos - positionInGraph[x][0]);
+                int distanceToYPos = Math.abs(targetYpos - positionInGraph[x][1]);
+                int largeValue = (distanceToXPos * distanceToXPos) + (distanceToYPos * distanceToYPos);
+                double cValue = Math.sqrt(largeValue);
+                distanceToGoal[x] = cValue;
+                System.out.println("Distance to X position: " + distanceToXPos + " Distance to Y position: " + distanceToYPos + " Distance: " + cValue );
+                
+            }
         } catch( Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e.toString() + " ");
+            e.printStackTrace();
         }
         
         Path path = Dj(-1, 2); // Finding the fastest path using Dijstra's
@@ -266,6 +296,29 @@ public static void siftDown(int newNum) {
         System.out.println("Path distance: " + fastestPath.distance);
     
         System.out.println("Number of vertices visited: " + fastestPath.totalVertices);
+
+        System.out.println("--------- Shortest path with A*-----------------");
+
+        Path newPath = aStar(-1, 2);
+        System.out.print("Path: ");
+        for(int x = 0; x < newPath.path.length; x++) {
+        if(x != newPath.path.length -1){
+            System.out.print(newPath.path[x] + ", "); // Print all nodes in the path... 
+        } else {
+            System.out.print(newPath.path[x]);
+            System.out.println();
+
+        }
+        
+
+    }
+     
+        
+     
+        System.out.println("Path distance: " + newPath.distance);
+    
+        System.out.println("Number of vertices visited: " + newPath.totalVertices);
+
       
         
 }
@@ -315,7 +368,7 @@ public static Path Dj(int ignore, int position) {
         selectedCount++;
         
 
-        //System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] );
+        System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] );
         
         //Setting the finalDistance of the selected node as it has been 'visited' and therefore it's distance is set...
         finalDistance[closestIndex] = distance[closestIndex];
@@ -451,4 +504,137 @@ public static char[] showParents(int start, int end, char[] parents) {
         }
         return true;
     }
+
+    public static Path aStar(int ignore, int position) { 
+    int[] distance = new int[vertices]; // Holds the distances between a and each node that a can access...
+    char[] candidates = new char[vertices]; // Holds the information about which nodes have not been selected...
+    int candidateCount = vertices;
+    int selectedCount = 0; // Holds count of the amount of candidates in the candidates array
+    candidates = alphabet.substring(0, vertices -1).toCharArray();
+    char[] selected = new char[vertices];
+    int[] finalDistance = new int[vertices];
+    char[] parents = new char[vertices];
+
+   
+
+    
+
+    // For all letters in the alphabet (x)....
+    for(int x = 0; x < vertices; x++) {
+        
+        /*If there exists an edge between a and (x), add the value to correct position i.e. if edge from a to b
+            has distance of 7, distance[1] = 7; as b has numric value of 1. */
+        if(adjacencyList[0][x] != 0) {
+            distance[x] = adjacencyList[0][x];
+            //Queue.push(x);
+            //Queue.siftUp(selectedCount);
+            //System.out.println("A to " + alphabet.charAt(x) + " weight: " + distance[x] );
+            parents[x] = 'a';
+            
+        }
+    }
+
+    selectedCount++; //Assuming we have selected the entry node... 
+    for(int x = 0; x < vertices -1; x++) {
+        int closestIndex;
+        char closest;
+        //Setting the index and letter to the node which is yet to be added and has least distance...
+        closestIndex = findSmallestDistanceAStar(distance, ignore, position); 
+        closest = alphabet.charAt(findSmallestDistanceAStar(distance, ignore, position));
+         
+            
+        //Tracking order and count of nodes that have been visited (moved to selected from candidate set)
+        selected[selectedCount] = closest;
+        selectedCount++;
+        
+
+        System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] );
+        
+        //Setting the finalDistance of the selected node as it has been 'visited' and therefore it's distance is set...
+        finalDistance[closestIndex] = distance[closestIndex];
+       
+        
+        //If the closest node is the target node, break loop
+        if(closest == 't') break;
+        candidateCount--;
+
+        // For all vertices...
+        for(int z = 0; z < vertices; z++) {
+
+            //If there exists a line between the selected vertice and vertice z AND the distance of vertice z isnt already set...
+            if(adjacencyList[closestIndex][z] != 0 && distance[z] != -1) {
+                
+                //If the distance has yet to be set, add new distance that is weight of current node + weight of edge to node z
+                if(distance[z] == 0) {
+                    //System.out.println("New edge added:  " + alphabet.charAt(z) + " Weight: " + distance[closestIndex] +" " + adjacencyList[closestIndex][z] + " parent: " + closest);
+                    distance[z] = distance[closestIndex] + adjacencyList[closestIndex][z] ;
+                    parents[z] = closest;
+                }/* Else if the distance has been set and current distance of node z is greater than
+                    the weight of current node + weight of edge to node z, set new distance to the smaller value 
+                    and update the parent to the current node... */
+                else if(distance[z] > distance[closestIndex] + adjacencyList[closestIndex][z]) {
+                    //System.out.println("Edge updated: " + alphabet.charAt(z) + " Weight: " + distance[closestIndex] + " " + adjacencyList[closestIndex][z] + " old value: " + distance[z] + " parent: " + closest);
+
+                    distance[z] = distance[closestIndex] + adjacencyList[closestIndex][z];
+                    parents[z] = closest;
+                }
+
+               
+            }
+        }
+        // Setting the distance of the selected node to null value so isn't used in findSmallestDistance...
+        distance[closestIndex] = -1;
+        
+    }
+    /*
+    for(int x = 0; x < vertices; x ++) {
+        System.out.println(alphabet.charAt(x) +":  " + finalDistance[x] + " parent: " +parents[x]);
+        
+        
+    }
+    */
+
+    
+    //System.out.println("Shortest path with Djisktra's:");
+    char[] path = showParents(0, alphabet.indexOf('t'), parents);
+    //System.out.println("Path distance: " + finalDistance[alphabet.indexOf("t")]);
+    //System.out.println("Number of vertices visited: " + selectedCount);
+    Path finalPath = new Path();
+    finalPath.distance =  finalDistance[alphabet.indexOf(targetPos)];
+    finalPath.parents = parents;
+    finalPath.path = path;
+    finalPath.totalVertices = selectedCount;
+    return finalPath;
+   
+
+}
+
+public static int findSmallestDistanceAStar(int[] distance, int ignore, int ignorePosition) {
+        int smallest = -1;
+        int second = -1;
+        double heuristic;
+        for(int x = 0; x < distance.length ; x++) {
+           
+         
+            if(smallest == -1 ){
+                if(distance[x] > 0) {
+                    smallest = x;
+                } 
+            } else {
+                heuristic = distance[x] + distanceToGoal[0];
+                if(distance[x] > 0 && heuristic < distance[smallest] + distanceToGoal[smallest]) {
+                    second = smallest;
+                    smallest = x;
+                }
+            }
+            
+
+
+        }
+
+        return smallest;
+
+    }
+
+    
 }
