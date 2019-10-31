@@ -13,11 +13,17 @@ public class a3 {
     public static class Queue {
 
         private static int index = 0;
-        private static int heap[] = new int[20];
+        private static int heap[] = new int[25];
         private static int distanceToIndex[] = new int[2000];
 
         public static void push(int word, int distances) {
-            heap[index] = distances;
+            if (word != 0) {
+                //System.out.println(alphabet.charAt(word) + ": " + distances);
+                heap[index] = distances;
+            } else {
+                //System.out.println("here");
+            }
+
             siftUp(index);
             index++;
             distanceToIndex[distances] = word;
@@ -27,7 +33,7 @@ public class a3 {
 
         public static void intitialiseQueue() {
             index = 0;
-            heap = new int[20];
+            heap = new int[25];
             distanceToIndex = new int[2000];
         }
 
@@ -36,26 +42,30 @@ public class a3 {
                 if (heap[x] == searchNumber) {
                     return x;
                 } else {
-                    // System.out.println("Not equal to: " + heap[x]);
+                    //System.out.println("Not equal to: " + heap[x]);
                 }
             }
-            System.out.println("can't find: " + searchNumber);
+            //System.out.println("can't find: " + searchNumber);
             return -1;
         }
 
         public static int dequeue() {
             int heapReturn = heap[0];
             heap[0] = infinity;
+            // System.out.println(
+            //         "setting " + alphabet.charAt(distanceToIndex[heapReturn]) + " " + heapReturn + " " + heap[0]);
             // swap(heap, 0, index);
-            //System.out.println("Settting " + alphabet.charAt(distanceToIndex[heapReturn]) + " to infinity");
+            // System.out.println("Settting " + alphabet.charAt(distanceToIndex[heapReturn])
+            // + " to infinity");
+            index--;
             siftDown(0);
+           // printHeap();
 
             if (index == 0) {
-                System.out.println("queue empty");
+                //System.out.println("queue empty");
             }
-            index--;
-            //printHeap();
 
+            //System.out.println(distanceToIndex[heapReturn]);
             return distanceToIndex[heapReturn];
 
         }
@@ -97,8 +107,7 @@ public class a3 {
         }
 
         public static int[] swap(int[] heap, int position1, int position2) {
-            // System.out.println("Swapping: " + heap[position1] + " with: " +
-            // heap[position2]);
+            //System.out.println("Swapping: " + heap[position1] + " with: " + heap[position2]);
             int temp = heap[position1];
             heap[position1] = heap[position2];
             heap[position2] = temp;
@@ -109,7 +118,7 @@ public class a3 {
             for (int i = index / 2; i >= 0; i--) {
                 siftDown(i);
             }
-            //printHeap();
+            // printHeap();
             return heap;
         }
 
@@ -185,7 +194,7 @@ public class a3 {
 
                     startPos = parts[0].toCharArray()[0]; // Set start pos
                     targetPos = parts[1].toCharArray()[0]; // Set end pos
-                    System.out.println(startPos + " " + targetPos);
+                    System.out.println("Start and End Position" + startPos + " " + targetPos);
 
                 }
 
@@ -249,8 +258,9 @@ public class a3 {
                 int largeValue = (distanceToXPos * distanceToXPos) + (distanceToYPos * distanceToYPos);
                 double cValue = Math.sqrt(largeValue);
                 distanceToGoal[x] = cValue;
-                // System.out.println("Distance to X position: " + distanceToXPos + " Distance to Y position: "
-                //         + distanceToYPos + " Distance: " + cValue);
+                // System.out.println("Distance to X position: " + distanceToXPos + " Distance
+                // to Y position: "
+                // + distanceToYPos + " Distance: " + cValue);
 
             }
         } catch (Exception e) {
@@ -286,8 +296,8 @@ public class a3 {
             Queue.intitialiseQueue();
             int previous = x + 1;
             int temp = adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])];
-            System.out.println("Removing edge between: " + path.path[x] + " " + path.path[previous] + " "
-                    + adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])]);
+            // System.out.println("Removing edge between: " + path.path[x] + " " + path.path[previous] + " "
+            //         + adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])]);
             adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])] = 0;
             Path p = new Path();
             try {
@@ -301,7 +311,7 @@ public class a3 {
                 fastestPath = p;
             } else if (fastestPath.distance > p.distance && p.distance != 0) {
                 fastestPath = p;
-                System.out.println("Path weight: " + p.distance);
+               // System.out.println("Path weight: " + p.distance);
             }
 
         }
@@ -323,8 +333,10 @@ public class a3 {
 
         System.out.println("Number of vertices visited: " + fastestPath.totalVertices);
 
-        System.out.println("--------- Shortest path with A*-----------------");
+        System.out.println();
 
+        System.out.println("--------- Shortest path with A*-----------------");
+        Queue.intitialiseQueue();
         Path newPath = aStar(-1, 2);
         System.out.print("Path: ");
         for (int x = 0; x < newPath.path.length; x++) {
@@ -341,6 +353,50 @@ public class a3 {
         System.out.println("Path distance: " + newPath.distance);
 
         System.out.println("Number of vertices visited: " + newPath.totalVertices);
+        System.out.println();
+
+        Path AStarfastestPath = null;
+        for (int x = 0; x < path.path.length - 1; x++) {
+            Queue.intitialiseQueue();
+            int previous = x + 1;
+            int temp = adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])];
+            // System.out.println("Removing edge between: " + path.path[x] + " " + path.path[previous] + " "
+            //         + adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])]);
+            adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])] = 0;
+            Path p = new Path();
+            try {
+                p = aStar(alphabet.indexOf(path.path[x]), x);
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                e.printStackTrace();
+            }
+            adjacencyList[alphabet.indexOf(path.path[x])][alphabet.indexOf(path.path[previous])] = temp;
+            if (AStarfastestPath == null) {
+                AStarfastestPath = p;
+            } else if (AStarfastestPath.distance > p.distance && p.distance != 0) {
+                AStarfastestPath = p;
+                //System.out.println("Path weight: " + p.distance);
+            }
+
+        }
+
+        System.out.println("---------Second Shortest path with A*-----------------");
+        System.out.print("Path: ");
+        for (int x = 0; x < AStarfastestPath.path.length; x++) {
+            if (x != AStarfastestPath.path.length - 1) {
+                System.out.print(AStarfastestPath.path[x] + ", "); // Print all nodes in the path...
+            } else {
+                System.out.print(AStarfastestPath.path[x]);
+                System.out.println();
+
+            }
+
+        }
+
+        System.out.println("Path distance: " + AStarfastestPath.distance);
+
+        System.out.println("Number of vertices visited: " + AStarfastestPath.totalVertices);
+
 
     }
 
@@ -392,7 +448,8 @@ public class a3 {
             selected[selectedCount] = closest;
             selectedCount++;
 
-             System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] + " candidates left: " + candidateCount);
+            // System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] + " candidates left: "
+            //         + candidateCount);
 
             // Setting the finalDistance of the selected node as it has been 'visited' and
             // therefore it's distance is set...
@@ -413,8 +470,9 @@ public class a3 {
                     // If the distance has yet to be set, add new distance that is weight of current
                     // node + weight of edge to node z
                     if (distance[z] == 0) {
-                        // System.out.println("New edge added: " + closest + alphabet.charAt(z) + " Weight: "
-                        //         + (distance[closestIndex] + adjacencyList[closestIndex][z]));
+                        // System.out.println("New edge added: " + closest + alphabet.charAt(z) + "
+                        // Weight: "
+                        // + (distance[closestIndex] + adjacencyList[closestIndex][z]));
                         distance[z] = distance[closestIndex] + adjacencyList[closestIndex][z];
                         Queue.push(z, distance[closestIndex] + adjacencyList[closestIndex][z]);
                         parents[z] = closest;
@@ -425,12 +483,12 @@ public class a3 {
                        */
                     else if (distance[z] > distance[closestIndex] + adjacencyList[closestIndex][z]
                             && distance[z] != -1) {
-                        // int temp = Queue.distanceToIndex[distance[z]];
-                        int queuePosition = Queue.find(distance[z]);
+                        // int temp = 
+                        int queuePosition = Queue.distanceToIndex[distance[z]];
                         Queue.heap[queuePosition] = distance[closestIndex] + adjacencyList[closestIndex][z];
                         // System.out.println("Edge updated: " + alphabet.charAt(z) + " Weight: "
-                        //         + (distance[closestIndex] + adjacencyList[closestIndex][z]) + " old value: "
-                        //         + distance[z] + " parent " + closest + " qp: " + queuePosition);
+                        // + (distance[closestIndex] + adjacencyList[closestIndex][z]) + " old value: "
+                        // + distance[z] + " parent " + closest + " qp: " + queuePosition);
                         Queue.makeheap(Queue.heap);
 
                         distance[z] = distance[closestIndex] + adjacencyList[closestIndex][z];
@@ -442,12 +500,12 @@ public class a3 {
             }
             // Setting the distance of the selected node to null value so isn't used in
             // findSmallestDistance...
-            distance[closestIndex - 1] = infinity;
+            distance[closestIndex -1] = infinity;
 
         }
-    
+
         char[] path = showParents(0, alphabet.indexOf('t'), parents);
-       
+
         Path finalPath = new Path();
         finalPath.distance = finalDistance[alphabet.indexOf(targetPos)];
         finalPath.parents = parents;
@@ -538,6 +596,8 @@ public class a3 {
         int[] finalDistance = new int[vertices];
         char[] parents = new char[vertices];
 
+        distance[0] = infinity;
+
         // For all letters in the alphabet (x)....
         for (int x = 0; x < vertices; x++) {
 
@@ -548,8 +608,7 @@ public class a3 {
              */
             if (adjacencyList[0][x] != 0) {
                 distance[x] = adjacencyList[0][x];
-                // Queue.push(x);
-                // Queue.siftUp(selectedCount);
+                Queue.push(x, adjacencyList[0][x] + (int) distanceToGoal[x]);
                 // System.out.println("A to " + alphabet.charAt(x) + " weight: " + distance[x]
                 // );
                 parents[x] = 'a';
@@ -558,21 +617,25 @@ public class a3 {
         }
 
         selectedCount++; // Assuming we have selected the entry node...
+
         for (int x = 0; x < vertices - 1; x++) {
             int closestIndex;
             char closest;
             // Setting the index and letter to the node which is yet to be added and has
             // least distance...
-            closestIndex = findSmallestDistanceAStar(distance, ignore, position);
-            closest = alphabet.charAt(findSmallestDistanceAStar(distance, ignore, position));
+            // closestIndex = findSmallestDistance(distance, ignore, position);
+            // closest = alphabet.charAt(findSmallestDistance(distance, ignore, position));
+
+            closestIndex = Queue.dequeue();
+            closest = alphabet.charAt(closestIndex);
 
             // Tracking order and count of nodes that have been visited (moved to selected
             // from candidate set)
             selected[selectedCount] = closest;
             selectedCount++;
 
-            System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] + " candidates left: "
-                    + candidateCount);
+            // System.out.println("Closest: " + closest + " Total weight: " + distance[closestIndex] + " candidates left: "
+            //         + candidateCount);
 
             // Setting the finalDistance of the selected node as it has been 'visited' and
             // therefore it's distance is set...
@@ -588,49 +651,49 @@ public class a3 {
 
                 // If there exists a line between the selected vertice and vertice z AND the
                 // distance of vertice z isnt already set...
-                if (adjacencyList[closestIndex][z] != 0 && distance[z] != -1) {
+                if (adjacencyList[closestIndex][z] != 0 && distance[z] != infinity && distance[closestIndex] != -1) {
 
                     // If the distance has yet to be set, add new distance that is weight of current
                     // node + weight of edge to node z
                     if (distance[z] == 0) {
-                        // System.out.println("New edge added: " + alphabet.charAt(z) + " Weight: " +
-                        // distance[closestIndex] +" " + adjacencyList[closestIndex][z] + " parent: " +
-                        // closest);
+                        // System.out.println("New edge added: " + closest + alphabet.charAt(z) + "
+                        // Weight: "
+                        // + (distance[closestIndex] + adjacencyList[closestIndex][z]));
                         distance[z] = distance[closestIndex] + adjacencyList[closestIndex][z];
+                        Queue.push(z, distance[closestIndex] + (int) distanceToGoal[x] + adjacencyList[closestIndex][z]
+                                + (int) distanceToGoal[z]);
                         parents[z] = closest;
                     } /*
                        * Else if the distance has been set and current distance of node z is greater
                        * than the weight of current node + weight of edge to node z, set new distance
                        * to the smaller value and update the parent to the current node...
                        */
-                    else if (distance[z] > distance[closestIndex] + adjacencyList[closestIndex][z]) {
-                        // System.out.println("Edge updated: " + alphabet.charAt(z) + " Weight: " +
-                        // distance[closestIndex] + " " + adjacencyList[closestIndex][z] + " old value:
-                        // " + distance[z] + " parent: " + closest);
+                    else if (distance[z] > distance[closestIndex] + adjacencyList[closestIndex][z]
+                            && distance[z] != -1) {
+                        // int temp =
+                        int queuePosition = Queue.distanceToIndex[distance[z]];// Queue.find(distance[z]);
+                        Queue.heap[queuePosition] = distance[closestIndex] + adjacencyList[closestIndex][z]
+                                + (int) distanceToGoal[z];
+                        // System.out.println("Edge updated: " + alphabet.charAt(z) + " Weight: "
+                        //         + (distance[closestIndex] + adjacencyList[closestIndex][z]) + " old value: "
+                        //         + distance[z] + " parent " + closest + " qp: " + queuePosition);
+                        // Queue.makeheap(Queue.heap);
 
                         distance[z] = distance[closestIndex] + adjacencyList[closestIndex][z];
                         parents[z] = closest;
+                    } else {
+                        // System.out.println("nothing..." + closestIndex);
                     }
-
                 }
             }
             // Setting the distance of the selected node to null value so isn't used in
             // findSmallestDistance...
-            distance[closestIndex] = -1;
+            distance[closestIndex] = infinity;
 
         }
-        /*
-         * for(int x = 0; x < vertices; x ++) { System.out.println(alphabet.charAt(x)
-         * +":  " + finalDistance[x] + " parent: " +parents[x]);
-         * 
-         * 
-         * }
-         */
 
-        // System.out.println("Shortest path with Djisktra's:");
         char[] path = showParents(0, alphabet.indexOf('t'), parents);
-        // System.out.println("Path distance: " + finalDistance[alphabet.indexOf("t")]);
-        // System.out.println("Number of vertices visited: " + selectedCount);
+
         Path finalPath = new Path();
         finalPath.distance = finalDistance[alphabet.indexOf(targetPos)];
         finalPath.parents = parents;
@@ -639,29 +702,4 @@ public class a3 {
         return finalPath;
 
     }
-
-    public static int findSmallestDistanceAStar(int[] distance, int ignore, int ignorePosition) {
-        int smallest = -1;
-        int second = -1;
-        double heuristic;
-        for (int x = 0; x < distance.length; x++) {
-
-            if (smallest == -1) {
-                if (distance[x] > 0) {
-                    smallest = x;
-                }
-            } else {
-                heuristic = distance[x] + distanceToGoal[0];
-                if (distance[x] > 0 && heuristic < distance[smallest] + distanceToGoal[smallest]) {
-                    second = smallest;
-                    smallest = x;
-                }
-            }
-
-        }
-
-        return smallest;
-
-    }
-
 }
